@@ -1,0 +1,32 @@
+Problem 1:
+I recognized that to convert a homework 1 style grammar, I can maintain the 
+first element of the tuple as the start symbol, and then move on to
+returning a function as the second element that takes in a non-terminal
+to find all the right hand side's within the homework 1 grammar that correspond
+to the start symbol.
+
+Problem 2:
+After recognizing that the problem involved a backtracking nature I
+was able to break the problem down into two key components, the 
+matcher itself and the match_element functions. I noticed that the nature
+of the problem involves comparing each element in the fragment to its "path"
+to see if it exists in the grammar rules' right hand side, and keep
+doing this for every element in the fragment unless I hit a critical point
+wherein I stopped moving the "window" for gathering the prefixes, and just
+returned the suffix.
+
+The problem would involve a lot of backtracking once we found the current
+element, to move onto the next symbol in the rhs and find the next prefix 
+element. In order for this backtracking to work in a functional style a recursive functions must run simultaneously which is why I used OCaml's keyword
+"and".
+
+The program can be broken into 3 key components:
+1.) parse_prefix - The main function that takes in a grammar, and takes in the acceptor and fragment to function currie to the matcher that the function uses to return the derivation.
+
+2.) matcher - This is the high level matcher that takes in the starting symbol, the set of rules, the matching rules, the acceptor, derivation (returned from parse_prefix) and finally the fragment itself. This function is responsible for parsing through the rules that match with the starting symbol in the grammar passed. The set of rules is then broken up into a first rule and other rules. Based on this current upper rule, the second helper function described below is used, to find all the matching elements within the fragment. If it returns a None, it skips this current rule and moves through the other rules; if there is some result, then some result is returned.
+
+3.) match_element - This function takes in all the rules, the current rule and
+the acceptor, derivation and fragment. While trying to match the elements in 
+the rule in the matcher function, it also appends to our derivation the
+start for this rule and the rule itself. When it tries to match every element, if the case is simply the rule being an empty list, then we just return the empty list, otherwise it breaks down the fragment into its individual components
+and try to match the current element with the terminating symbol being looked for. If there is a match then it continues trying to match the next element in the fragment and continues until the point is hit where there is either no more (empty list -> acceptor) or a non-terminal symbol, in which case the parent matcher is returned with the start now being the nonterminal with the new acceptor being the rest of the current rhs to match with those elements. Once the derivation is found for the current element in the rhs, the acceptor should now be applied to the rest of the right hand side for the next element in the fragment. That is in a fragment like the example - ["3", "+", "4", "-"], first find the derivation for "3" in a top down approach from the first element in the rhs for the start symbol Expr, and then perform a horizontal scale approach to move the next element in the current rhs (say "Binop") in order to match with the "+" symbol. This is done recursively modifying the acceptor within the match_element in order to move the window through the prefixes, stopping to leave only the suffix.
